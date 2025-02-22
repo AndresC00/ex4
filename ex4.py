@@ -1,37 +1,38 @@
-# Example 4
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 import streamlit as st
-import plotly.express as px
-import pandas as pd
 
-# Load Sample Data
-df = px.data.gapminder()
+# Cargar dataset de propinas
+df = sns.load_dataset("tips")
 
-# Streamlit App Title
-st.title("📊 Interactive Dashboard with Multiple Plots")
+# Configurar la app de Streamlit
+st.title("Análisis de Propinas")
+st.write("Este dashboard muestra análisis del dataset de propinas en un restaurante.")
 
-# Create a sidebar filter for selecting a year
-selected_year = st.sidebar.slider("Select Year:", int(df["year"].min()), int(df["year"].max()), int(df["year"].min()))
+# Selección de opciones para gráficos
+tipo_grafico = st.selectbox("Selecciona un tipo de gráfico:", ["Histograma", "Scatter Plot", "Box Plot", "Violin Plot"])
 
-# Filter data based on the selected year
-filtered_df = df[df.year == selected_year]
+if tipo_grafico == "Histograma":
+    columna = st.selectbox("Selecciona una columna:", ["total_bill", "tip", "size"])
+    fig, ax = plt.subplots()
+    sns.histplot(df[columna], kde=True, ax=ax)
+    st.pyplot(fig)
 
-# Create three different plots
-fig1 = px.scatter(filtered_df, x="gdpPercap", y="lifeExp", size="pop", color="continent",
-                  hover_name="country", log_x=True, size_max=60, title="Life Expectancy vs GDP")
+elif tipo_grafico == "Scatter Plot":
+    x_col = st.selectbox("Selecciona la columna para el eje X:", ["total_bill", "tip", "size"])
+    y_col = st.selectbox("Selecciona la columna para el eje Y:", ["total_bill", "tip", "size"])
+    fig, ax = plt.subplots()
+    sns.scatterplot(data=df, x=x_col, y=y_col, hue="sex", ax=ax)
+    st.pyplot(fig)
 
-fig2 = px.bar(filtered_df, x="continent", y="pop", color="continent", title="Population per Continent")
+elif tipo_grafico == "Box Plot":
+    columna = st.selectbox("Selecciona una columna:", ["total_bill", "tip", "size"])
+    fig, ax = plt.subplots()
+    sns.boxplot(x="day", y=columna, data=df, ax=ax)
+    st.pyplot(fig)
 
-fig3 = px.line(filtered_df, x="country", y="gdpPercap", color="continent", title="GDP Per Capita by Country")
-
-# Layout - Using Tabs to Display Multiple Plots
-tab1, tab2, tab3 = st.tabs(["📌 Scatter Plot", "📊 Bar Chart", "📈 Line Chart"])
-
-with tab1:
-    st.plotly_chart(fig1, use_container_width=True)
-
-with tab2:
-    st.plotly_chart(fig2, use_container_width=True)
-
-with tab3:
-    st.plotly_chart(fig3, use_container_width=True)
+elif tipo_grafico == "Violin Plot":
+    columna = st.selectbox("Selecciona una columna:", ["total_bill", "tip", "size"])
+    fig, ax = plt.subplots()
+    sns.violinplot(x="day", y=columna, data=df, ax=ax)
+    st.pyplot(fig)
